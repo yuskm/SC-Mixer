@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang=ja ng-app="SoundCloudMixer">
+<head>
+    <meta charset="utf-8">
+    <title>Soundcloud Mixer</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
+</head>
+
+<div class="container">
+    <div id="mixerCtrl" ng-controller="mixerCtrl">
+        <div class="trackname">
+            <section>{{deck1Track}}</section>
+            <section>{{deck2Track}}</section>
+        </div>
+
+        <div class="mixercontrol">
+            <div class="deck1">
+                <div>
+                    <label for="deck1Pan">PAN</label>
+                    <input class="horzslider" id="deck1Pan" type="range" min="-1" max="1" step="0.01" value="1" ng-model="deck1Pan" />
+                </div>
+                <div>
+                    <label for="deck1Speed">SPD</label>
+                    <input class="vertslider" id="deck1Speed" type="range" orient="vertical" min="0.5" max = "2.0" step = "0.01" value="1" ng-model="deck1Speed" />
+                </div>
+                <div>
+                    <label for="deck1LpfCutoff">LPF</label>
+                    <input class="vertslider" id="deck1LpfCutoff" type="range"  orient="vertical" min="0" max="1" step="0.01" value="1" ng-model="deck1LpfCutoff" />
+                </div>
+                <div>
+                    <label for="deck1HpfCutoff">HPF</label>
+                    <input class="vertslider" id="deck1HpfCutoff" type="range" orient="vertical" min="0" max="1" step="0.01" value="1" ng-model="deck1HpfCutoff" />
+                </div>
+                <div>
+                    <label for="deck1Gain">VOL</label>
+                    <input class="vertslider" id="deck1Gain" type="range" orient="vertical" min="0" max="1.2" step="0.01" value="1" ng-model="deck1Gain" />
+                </div>
+                <!-- <input class="bbb" type="range" min="0" max="1" step="0.01" value="1" ng-model="deck1LpfQ" /> -->
+                <!-- <input class="aaa" type="range" min="0" max="1" step="0.01" value="1" ng-model="deck1HpfQ" /> -->
+            </div>
+            <div class="deck2">
+                <div>
+                    <label for="deck2Speed">SPD</label>
+                    <input class="vertslider" id="deck2Speed" type="range" orient="vertical" min="0.5" max = "2.0" step = "0.01" value="1" ng-model="deck2Speed" />
+                </div>
+                <div>
+                    <label for="deck2LpfCutoff">LPF</label>
+                    <input class="vertslider" id="deck2LpfCutoff" type="range" orient="vertical" min="0" max="1" step="0.01" value="1" ng-model="deck2LpfCutoff" />
+                </div>
+                <div>
+                    <label for="deck2HpfCutoff">HPF</label>
+                    <input class="vertslider" id="deck2HpfCutoff" type="range" orient="vertical" min="0" max="1" step="0.01" value="1" ng-model="deck2HpfCutoff" />
+                </div>
+                <div>
+                    <label for="deck2Gain">VOL</label>
+                    <input class="vertslider" id="deck2Gain" type="range" orient="vertical" min="0" max="1.2" step="0.01" value="1" ng-model="deck2Gain" />
+                </div>
+                <div>
+                    <label for="deck2Pan">PAN</label>
+                    <input class="horzslider" id="deck2Pan" type="range" min="-1" max="1" step="0.01" value="1" ng-model="deck2Pan" />
+                </div>
+                <!-- <input class="bbb" type="range" min="0" max="1" step="0.01" value="1" ng-model="deck1LpfQ" /> -->
+                <!-- <input class="aaa" type="range" min="0" max="1" step="0.01" value="1" ng-model="deck1HpfQ" /> -->
+            </div>
+        </div>
+
+        <div class="fader">
+            <label for="fader">FADER</label>
+            <input id = "fader" type="range" min="-1.0" max = "1.0" step = "0.01" value="0" ng-model="fader" />
+        </div>
+
+        <div class="playcontrol">
+            <div class="deck1">
+                <button class="btn btn-default" ng-click="play1()" ng-disabled="!isDeck1EnablePlay()" >Play</button>
+                <button class="btn btn-default" ng-click="stop1()">Stop</button>
+                <input class="horzslider" type="range" min="0" max = "100" step = "1" value="0" ng-model="deck1CurrentPos" ng-change="deck1Seek()" />
+            </div>
+            <div class="deck2">
+                <button class="btn btn-default" ng-click="play2()" ng-disabled="!isDeck2EnablePlay()">Play</button>
+                <button class="btn btn-default" ng-click="stop2()">Stop</button>
+                <input class="horzslider" type="range" min="0" max = "100" step = "1" value="0" ng-model="deck2CurrentPos" ng-change="deck2Seek()"/>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div id="searchTrackCtrl" ng-controller="searchTrackCtrl">
+        <table class="table" ng-cloak>
+            <div class="searchform">
+                <form novalidate class="form-inline" role="form" ng-submit="searchTracks()">
+                    <div class="form-group">
+                        <label class="sr-only" for="keyword">keyword</label>
+                        <input type="text" name="keyword" id="keyword" class="form-control" placeholder="keyword" ng-model="keyword" />
+                    </div>
+                    <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+                </form>
+            </div>
+
+            <div class="searchresult">
+                <tr id="search-track-{{$index}}" ng-repeat="track in searchResults track by $index" >
+                    <td class="left"><img src="{{track.artwork_url}}" /></td>
+                    <td><span class="text-muted">{{track.user.username}}</span><br /><strong>{{track.title}}</strong></td>
+                    <td class="right"><button class="btn btn-default" ng-click="loadTrack1(track)"><span class="glyphicon glyphicon-triangle-left"></span></button></td>
+                    <td class="right"><button class="btn btn-default" ng-click="loadTrack2(track)"><span class="glyphicon glyphicon-triangle-right"></span></button></td>
+                </tr>
+            </div>
+        </table>
+    </div>
+</div>
+<!--
+<div class="text-area">
+    <textarea class="console" wrap="off"></textarea>
+</div>
+-->
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+<script src="https://connect.soundcloud.com/sdk.js"></script>
+<script src="javascripts/app.js"></script>
+<script src="javascripts/track.js"></script>
+<script src="javascripts/mixer.js"></script>
+
+</body>
+</html>
